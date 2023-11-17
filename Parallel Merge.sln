@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.4.33213.308
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Parallel Merge", "Parallel Merge\Parallel Merge.csproj", "{6141A037-6F40-4CB1-A415-D19679F791EE}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6141A037-6F40-4CB1-A415-D19679F791EE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6141A037-6F40-4CB1-A415-D19679F791EE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6141A037-6F40-4CB1-A415-D19679F791EE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6141A037-6F40-4CB1-A415-D19679F791EE}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {F960F363-BC23-445A-970E-A9D126A54726}
+	EndGlobalSection
+EndGlobal
