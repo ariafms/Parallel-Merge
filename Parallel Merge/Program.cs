@@ -5,12 +5,15 @@ using System.Threading.Tasks;
 
 //Make Sure the  Array is Sorted
 Random rnd = new Random();
-int numberOfElements = 10000;
+int numberOfElements = 1000000;
 int[] A = new int[numberOfElements];
 int[] B = new int[numberOfElements];
+Stopwatch watchSequential, watchParallel,watchInit;
+ParallelOptions options = new ParallelOptions() { MaxDegreeOfParallelism = 2 };
+watchInit = Stopwatch.StartNew();
 var firstArray = Task.Factory.StartNew(() =>
 {
-    Parallel.For(0, numberOfElements, i =>
+    Parallel.For(0,numberOfElements, options, i =>
     {
         A[i] = rnd.Next(5, 28);
     }
@@ -20,7 +23,7 @@ firstArray.Wait();
 Array.Sort(A);
 var secondArray = Task.Factory.StartNew(() =>
 {
-    Parallel.For(0, numberOfElements, i =>
+    Parallel.For(0, numberOfElements, options, i =>
    {
        B[i] = rnd.Next(3, 15);
    }
@@ -28,13 +31,15 @@ var secondArray = Task.Factory.StartNew(() =>
 });
 secondArray.Wait();
 Array.Sort(B);
+watchInit.Stop();
+Console.WriteLine("Init Elapsed Time: {0}", watchInit.Elapsed);
 int[] Result = new int[A.Length + B.Length];
-int FindInA(int key, int[] Array)
+int FindInA(int key)
 {
     int count = 0;
-    for (int i = 0; i < Array.Length; i++)
+    for (int i = 0; i < A.Length; i++)
     {
-        if (key >= Array[i])
+        if (key >= A[i])
         {
             count++;
         }
@@ -42,12 +47,12 @@ int FindInA(int key, int[] Array)
     return count;
    
 }
-int FindInB(int key, int[] Array)
+int FindInB(int key)
 {
     int count = 0;
-    for (int i = 0; i < Array.Length; i++)
+    for (int i = 0; i < B.Length; i++)
     {
-        if (key > Array[i])
+        if (key > B[i])
         {
             count++;
         }
@@ -71,46 +76,119 @@ int FindInB(int key, int[] Array)
 //    return count;
 //}
 #endregion
-
-var mergeTask = new Task(() => {
-
+var mergeTasks = new Task[10];
+for (int counter = 0; counter < 1; counter++)
+{
+    watchParallel = Stopwatch.StartNew();
+    mergeTasks[counter] =Task.Factory.StartNew(() =>
+    {
         var innerTask1 = new Task(() =>
         {
             for (int i = 0; i < A.Length; i++)
             {
-                int j = FindInB(A[i],B);
+                int j = FindInB(A[i]);
                 Result[i + j] = A[i];
             }
 
-        },TaskCreationOptions.AttachedToParent);
+        }, TaskCreationOptions.AttachedToParent);
         var innerTask2 = new Task(() =>
         {
             for (int i = 0; i < B.Length; i++)
             {
-                int j = FindInA(B[i],A);
+                int j = FindInA(B[i]);
                 Result[i + j] = B[i];
             }
-        },TaskCreationOptions.AttachedToParent);
+        }, TaskCreationOptions.AttachedToParent);
         innerTask1.Start();
         innerTask2.Start();
-    
-});
 
-mergeTask.Start();
-mergeTask.Wait();
-Console.WriteLine("Sorted A:");
-foreach(int i in A)
+    });
+    mergeTasks[counter].Wait();
+    watchParallel.Stop();
+    Console.WriteLine("Parallel:");
+    Console.WriteLine("Elapsed Time: {0}", watchParallel.Elapsed);
+}
+#region
+//Console.WriteLine("Sorted A:");
+//foreach (int i in A)
+//{
+//    Console.Write(i + " ");
+//}
+//Console.WriteLine();
+//Console.WriteLine("Sorted B:");
+//foreach (int i in B)
+//{
+//    Console.Write(i + " ");
+//}
+#endregion
+#region
+//Console.WriteLine();
+//Console.WriteLine("Sorted Array:");
+//for (int i = 0; i < Result.Length; i++)
+//{
+//    Console.Write(Result[i] + " ");
+//}
+#endregion
+
+static int[] SequentialMergeArrays(int[] array1, int[] array2)
 {
-    Console.Write(i + " ");
+    int[] result = new int[array1.Length + array2.Length];
+
+    int i = 0, j = 0, k = 0;
+
+    while (i < array1.Length && j < array2.Length)
+    {
+        if (array1[i] < array2[j])
+        {
+            result[k] = array1[i];
+            i++;
+        }
+        else
+        {
+            result[k] = array2[j];
+            j++;
+        }
+        k++;
+    }
+
+    while (i < array1.Length)
+    {
+        result[k] = array1[i];
+        i++;
+        k++;
+    }
+
+    while (j < array2.Length)
+    {
+        result[k] = array2[j];
+        j++;
+        k++;
+    }
+
+    return result;
 }
 Console.WriteLine();
-Console.WriteLine("Sorted B:");
-foreach(int i in B)
-{
-    Console.Write(i + " ");
-}
-Console.WriteLine();
-Console.WriteLine("Sorted Array:");
-for (int i = 0; i < Result.Length; i++) {
-    Console.Write(Result[i] + " ");
-}
+Console.WriteLine("Sequnetial:");
+#region
+//Console.WriteLine("Sorted A:");
+//foreach (int i in A)
+//{
+//    Console.Write(i + " ");
+//}
+//Console.WriteLine();
+//Console.WriteLine("Sorted B:");
+//foreach (int i in B)
+//{
+//    Console.Write(i + " ");
+//}
+watchSequential = Stopwatch.StartNew();
+var sequentialResult = SequentialMergeArrays(A, B);
+watchSequential.Stop();
+//Console.WriteLine();
+//Console.WriteLine("Sorted Array:");
+//for (int i = 0; i < Result.Length; i++)
+//{
+//    Console.Write(sequentialResult[i] + " ");
+//}
+#endregion
+Console.WriteLine("Elapsed Time: {0}",watchSequential.Elapsed);
