@@ -34,7 +34,7 @@ Array.Sort(B);
 watchInit.Stop();
 Console.WriteLine("Init Elapsed Time: {0}", watchInit.Elapsed);
 int[] Result = new int[A.Length + B.Length];
-int FindInA(int key)
+int ParallelFindInA(int key)
 {
     int count = 0;
     for (int i = 0; i < A.Length; i++)
