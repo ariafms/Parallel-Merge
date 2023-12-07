@@ -2,18 +2,44 @@
 using System.Globalization;
 using System.Numerics;
 using System.Threading.Tasks;
-
-//Make Sure the  Array is Sorted
 Random rnd = new Random();
-int numberOfElements = 1000000;
+int numberOfElements = 100;
 int[] A = new int[numberOfElements];
 int[] B = new int[numberOfElements];
-Stopwatch watchSequential, watchParallel,watchInit;
+int FindInA(int key)
+{
+    int count = 0;
+    for (int i = 0; i < A.Length; i++)
+    {
+        if (key >= A[i])
+        {
+            count++;
+        }
+    }
+    return count;
+
+}
+int FindInB(int key)
+{
+    int count = 0;
+    for (int i = 0; i < B.Length; i++)
+    {
+        if (key > B[i])
+        {
+            count++;
+        }
+    }
+    return count;
+
+}
+//Make Sure the  Array is Sorted
+
+Stopwatch watchSequential, watchParallel, watchInit;
 ParallelOptions options = new ParallelOptions() { MaxDegreeOfParallelism = 2 };
 watchInit = Stopwatch.StartNew();
 var firstArray = Task.Factory.StartNew(() =>
 {
-    Parallel.For(0,numberOfElements, options, i =>
+    Parallel.For(0, numberOfElements, options, i =>
     {
         A[i] = rnd.Next(5, 28);
     }
@@ -34,32 +60,7 @@ Array.Sort(B);
 watchInit.Stop();
 Console.WriteLine("Init Elapsed Time: {0}", watchInit.Elapsed);
 int[] Result = new int[A.Length + B.Length];
-int FindInA(int key)
-{
-    int count = 0;
-    for (int i = 0; i < A.Length; i++)
-    {
-        if (key >= A[i])
-        {
-            count++;
-        }
-    }
-    return count;
-   
-}
-int FindInB(int key)
-{
-    int count = 0;
-    for (int i = 0; i < B.Length; i++)
-    {
-        if (key > B[i])
-        {
-            count++;
-        }
-    }
-    return count;
 
-}
 #region
 //int Find(int key, int[] array)
 //{
@@ -76,38 +77,27 @@ int FindInB(int key)
 //    return count;
 //}
 #endregion
-var mergeTasks = new Task[10];
-for (int counter = 0; counter < 1; counter++)
-{
-    watchParallel = Stopwatch.StartNew();
-    mergeTasks[counter] =Task.Factory.StartNew(() =>
-    {
-        var innerTask1 = new Task(() =>
-        {
-            for (int i = 0; i < A.Length; i++)
-            {
-                int j = FindInB(A[i]);
-                Result[i + j] = A[i];
-            }
+watchParallel = Stopwatch.StartNew();
+//loop through an array of tasks
+Parallel.For(0, 10, counter =>
+  {
+      for (int i = 10 * counter; i < 10 * (counter + 1); i++)
+      {
+          int j = FindInB(A[i]);
+          Result[i + j] = A[i];
+          int k = FindInA(B[i]);
+          Result[i + k] = B[i];
+      }
+  });
 
-        }, TaskCreationOptions.AttachedToParent);
-        var innerTask2 = new Task(() =>
-        {
-            for (int i = 0; i < B.Length; i++)
-            {
-                int j = FindInA(B[i]);
-                Result[i + j] = B[i];
-            }
-        }, TaskCreationOptions.AttachedToParent);
-        innerTask1.Start();
-        innerTask2.Start();
+watchParallel.Stop();
+Console.WriteLine("Parallel:");
+Console.WriteLine("Elapsed Time: {0}", watchParallel.Elapsed);
 
-    });
-    mergeTasks[counter].Wait();
-    watchParallel.Stop();
-    Console.WriteLine("Parallel:");
-    Console.WriteLine("Elapsed Time: {0}", watchParallel.Elapsed);
-}
+
+//Sorted A and B
+
+
 #region
 //Console.WriteLine("Sorted A:");
 //foreach (int i in A)
@@ -121,13 +111,16 @@ for (int counter = 0; counter < 1; counter++)
 //    Console.Write(i + " ");
 //}
 #endregion
+
+//Parallel Result
+
 #region
-//Console.WriteLine();
-//Console.WriteLine("Sorted Array:");
-//for (int i = 0; i < Result.Length; i++)
-//{
-//    Console.Write(Result[i] + " ");
-//}
+Console.WriteLine();
+Console.WriteLine("Sorted Array:");
+for (int i = 0; i < Result.Length; i++)
+{
+    Console.Write(Result[i] + " ");
+}
 #endregion
 
 static int[] SequentialMergeArrays(int[] array1, int[] array2)
@@ -191,4 +184,4 @@ watchSequential.Stop();
 //    Console.Write(sequentialResult[i] + " ");
 //}
 #endregion
-Console.WriteLine("Elapsed Time: {0}",watchSequential.Elapsed);
+Console.WriteLine("Elapsed Time: {0}", watchSequential.Elapsed);
