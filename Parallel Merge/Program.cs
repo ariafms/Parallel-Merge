@@ -116,11 +116,11 @@ Console.WriteLine("Elapsed Time: {0}", watchParallel.Elapsed);
 
 #region
 Console.WriteLine();
-Console.WriteLine("Sorted Array:");
-for (int i = 0; i < Result.Length; i++)
-{
-    Console.Write(Result[i] + " ");
-}
+//Console.WriteLine("Sorted Array:");
+//for (int i = 0; i < Result.Length; i++)
+//{
+//    Console.Write(Result[i] + " ");
+//}
 #endregion
 
 static int[] SequentialMergeArrays(int[] array1, int[] array2)
